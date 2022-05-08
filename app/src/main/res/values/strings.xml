@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">NewsApplication</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="source">source</string>
+    <string name="title">title</string>
+    <string name="Title">Title</string>
+    <string name="Description">description</string>
+    <string name="description">Description</string>
+    <string name="published_at">Published_at</string>
+    <string name="Source">Source</string>
+    <string name="search">search</string>
+    <string name="breaking_news">breaking_news</string>
+    <string name="saved_news">saved_news</string>
+    <string name="search_news">search_news</string>
+    <string name="Global_News">Global News</string>
+    <string name="github_repository">github_repository</string>
+    <string name="rate_this_app">rate_this_app</string>
+    <string name="about_developer">about_developer</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+</resources>
