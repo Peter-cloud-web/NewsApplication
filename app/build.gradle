@@ -11,7 +11,7 @@ localProperties.load(new FileInputStream(localPropertiesFile))
 android {
 
     compileSdk 31
-    buildToolsVersion "29.0.3"
+    buildToolsVersion "30.0.3"
 
 
     defaultConfig{
@@ -21,8 +21,8 @@ android {
     defaultConfig {
 
         applicationId "com.example.newsapplication"
-        minSdk 21
-        targetSdk 31
+        minSdk 26
+        targetSdk 30
         versionCode 1
         versionName "1.0"
 
