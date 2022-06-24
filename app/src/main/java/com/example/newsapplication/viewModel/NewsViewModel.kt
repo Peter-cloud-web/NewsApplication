@@ -100,6 +100,14 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
         return Resource.Error(response.message())
     }
 
+    fun saveArticle(article: Article) = viewModelScope.launch {
+        newsRepository.insertArticle(article)
+    }
+
+    fun fetchSavedArticles() = newsRepository.getSavedNews()
+
+
+
     @RequiresApi(Build.VERSION_CODES.M)
     private fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<AppApplication>().getSystemService(
@@ -115,12 +123,6 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
             else -> false
         }
     }
-
-        fun saveArticle(article: Article) = viewModelScope.launch {
-            newsRepository.insertArticle(article)
-        }
-
-        fun fetchSavedArticles() = newsRepository.getSavedNews()
 
         fun deleteArticle(article: Article) = viewModelScope.launch {
             newsRepository.deleteArticle(article)
