@@ -6,16 +6,20 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
+import android.widget.AbsListView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Query
 import com.example.newsapplication.model.Article
 import com.example.newsapplication.model.NewsResponse
 import com.example.newsapplication.repository.NewsRepository
 import com.example.newsapplication.util.AppApplication
+import com.example.newsapplication.util.Constants
 import com.example.newsapplication.util.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -29,6 +33,7 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
 
+    var countryCode = "us"
     init {
         getBreakingNews("us")
         searchNews("microsoft")
@@ -36,7 +41,7 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
 
 
     fun getBreakingNews(countryCode: String) = viewModelScope.launch {
-        safeGetBreakingNewsArticleApiCall(countryCode)
+        safeGetBreakingNewsArticleApiCall()
     }
 
     fun searchNews(searchQuery: String) = viewModelScope.launch {
@@ -44,11 +49,11 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
     }
 
 
-    private suspend fun safeGetBreakingNewsArticleApiCall(countryCode: String) {
+    private suspend fun safeGetBreakingNewsArticleApiCall() {
         try {
             if (hasInternetConnection() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 breakingNews.postValue(Resource.Loading())
-                val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
+                val response = newsRepository.getBreakingNews(countryCode,breakingNewsPage)
                 breakingNews.postValue(handleBreakingNewsResponse(response))
             } else {
                 breakingNews.postValue(Resource.Error("No Internet Connection"))
@@ -128,5 +133,9 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
             newsRepository.deleteArticle(article)
         }
 
+
     }
+
+
+
 
