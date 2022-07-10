@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.newsapplication.repository.NewsRepository
 import com.example.newsapplication.util.AppApplication
-import java.lang.IllegalArgumentException
+
 
 class NewsViewModelProvider(val application: Application, val newsRepository: NewsRepository):ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

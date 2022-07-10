@@ -11,14 +11,18 @@ import android.widget.Adapter
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newsapplication.R
 import com.example.newsapplication.databinding.FragmentBreakingNewsBinding
+import com.example.newsapplication.db.ArticleDatabase
+import com.example.newsapplication.repository.NewsRepository
 import com.example.newsapplication.util.Constants.Companion.QUERY_PAGE_SIZE
 import com.example.newsapplication.util.Resource
 import com.example.newsapplication.viewModel.NewsViewModel
+import com.example.newsapplication.viewModel.NewsViewModelProvider
 import com.example.ui.activities.NewsActivity
 import com.example.ui.adapters.NewsAdapter
 
@@ -36,7 +40,10 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
         setUpRecyclerView(binding)
 
-        viewModel = (activity as NewsActivity).viewModel
+//        viewModel = (activity as NewsActivity).viewModel
+        val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
+        val viewModelProviderFactory = NewsViewModelProvider(activity?.application!!,newsRepository)
+        viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
         newsAdapter.setOnItemClickListener {
             val bundle = Bundle().apply {
@@ -72,7 +79,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             }
 
         })
-        binding.btnRetry.setOnClickListener {
+        binding.retryButton.setOnClickListener {
             viewModel.getBreakingNews("us")
         }
 
@@ -90,7 +97,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     }
     private fun showErrorMessage(message: String) {
         binding.itemErrorMessage.visibility = View.VISIBLE
-        binding.tvErrorMessage.text = message
+        binding.errorMessage.text = message
         isError = true
     }
 
@@ -120,7 +127,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             if(shouldPaginate){
                 isScrolling = false
             }else{
-                binding.rvBreakingNews.setPadding(0,0,0,0)
+                binding.breakingNewsRecyclerView.setPadding(0,0,0,0)
             }
 
         }
@@ -135,12 +142,11 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
     private fun setUpRecyclerView(binding:FragmentBreakingNewsBinding){
         newsAdapter = NewsAdapter()
-        binding.rvBreakingNews.apply{
+        binding.breakingNewsRecyclerView.apply{
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@BreakingNewsFragment.scrollListener)
         }
 
     }
-
 }

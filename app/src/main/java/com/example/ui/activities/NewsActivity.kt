@@ -23,9 +23,9 @@ import com.example.newsapplication.viewModel.NewsViewModelProvider
 class NewsActivity : AppCompatActivity() {
 
     lateinit var toggle: ActionBarDrawerToggle
-    val viewModel:NewsViewModel by viewModels{
-        NewsViewModelProvider(application, NewsRepository(ArticleDatabase(this)))
-    }
+//    val viewModel:NewsViewModel by viewModels{
+//        NewsViewModelProvider(application, NewsRepository(ArticleDatabase(this)))
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

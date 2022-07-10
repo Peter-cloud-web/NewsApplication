@@ -9,13 +9,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsapplication.R
 import com.example.newsapplication.databinding.FragmentSearchNewsBinding
+import com.example.newsapplication.db.ArticleDatabase
+import com.example.newsapplication.repository.NewsRepository
 import com.example.newsapplication.util.Constants
 import com.example.newsapplication.util.Resource
 import com.example.newsapplication.viewModel.NewsViewModel
+import com.example.newsapplication.viewModel.NewsViewModelProvider
 import com.example.ui.activities.NewsActivity
 import com.example.ui.adapters.NewsAdapter
 import kotlinx.coroutines.Job
@@ -37,11 +41,12 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
         binding = FragmentSearchNewsBinding.bind(view)
 
-        viewModel = (activity as NewsActivity).viewModel
+//        viewModel = (activity as NewsActivity).viewModel
+        val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
+        val viewModelProviderFactory = NewsViewModelProvider(activity?.application!!,newsRepository)
+        viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
         setUpRecyclerView(binding)
-
-        viewModel = (activity as NewsActivity).viewModel
 
         newsAdapter.setOnItemClickListener {
             val bundle = Bundle().apply {
@@ -53,7 +58,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
             )
         }
         var job: Job? = null
-        binding.etSearch.addTextChangedListener { editable ->
+        binding.editTextSearch.addTextChangedListener { editable ->
             job?.cancel()
 
             job = MainScope().launch {
@@ -97,7 +102,7 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
     private fun setUpRecyclerView(binding: FragmentSearchNewsBinding) {
         newsAdapter = NewsAdapter()
-        binding.rvSearchNews.apply {
+        binding.searchNewsRecyclerView.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
         }

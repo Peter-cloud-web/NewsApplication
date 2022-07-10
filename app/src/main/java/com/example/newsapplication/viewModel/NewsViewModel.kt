@@ -56,7 +56,7 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
                 val response = newsRepository.getBreakingNews(countryCode,breakingNewsPage)
                 breakingNews.postValue(handleBreakingNewsResponse(response))
             } else {
-                breakingNews.postValue(Resource.Error("No Internet Connection"))
+                breakingNews.postValue(Resource.Loading())
             }
         } catch (t: Throwable) {
             when (t) {

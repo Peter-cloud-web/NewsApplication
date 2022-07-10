@@ -6,7 +6,7 @@
     tools:context="com.example.ui.fragments.BreakingNewsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvBreakingNews"
+        android:id="@+id/breakingNewsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/tvErrorMessage"
+            android:id="@+id/errorMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
@@ -38,7 +38,7 @@
             android:textAlignment="center" />
 
         <Button
-            android:id="@+id/btnRetry"
+            android:id="@+id/retryButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"

@@ -20,6 +20,7 @@ import com.example.newsapplication.viewModel.NewsViewModel
 import com.example.newsapplication.viewModel.NewsViewModelProvider
 import com.example.ui.activities.NewsActivity
 import com.google.android.material.snackbar.Snackbar
+import java.util.Map.of
 
 class ArticleFragment : Fragment(R.layout.fragment_article) {
     lateinit var viewModel:NewsViewModel
@@ -31,10 +32,12 @@ class ArticleFragment : Fragment(R.layout.fragment_article) {
         val binding = FragmentArticleBinding.bind(view)
         fragmentArticleBinding = binding
 
+//        val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
+//        viewModel = (activity as NewsActivity).viewModel
         val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
-        viewModel = (activity as NewsActivity).viewModel
-//        val viewModelProviderFactory = NewsViewModelProvider(newsRepository)
-//        viewModel = ViewModelProvider(this,viewModelProviderFactory).get(NewsViewModel::class.java)
+        val viewModelProviderFactory = NewsViewModelProvider(activity?.application!!,newsRepository)
+        viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
+
 
         val article = args.article
         binding.webView.apply {
