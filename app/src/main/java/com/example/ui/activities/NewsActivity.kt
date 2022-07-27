@@ -2,30 +2,18 @@ package com.example.ui.activities
 
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.navigation.findNavController
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.newsapplication.R
 import com.example.newsapplication.databinding.ActivityNewsBinding
-import com.example.newsapplication.db.ArticleDatabase
-import com.example.newsapplication.repository.NewsRepository
-import com.example.newsapplication.util.AppApplication
-import com.example.newsapplication.viewModel.NewsViewModel
-import com.example.newsapplication.viewModel.NewsViewModelProvider
 
 class NewsActivity : AppCompatActivity() {
 
     lateinit var toggle: ActionBarDrawerToggle
-//    val viewModel:NewsViewModel by viewModels{
-//        NewsViewModelProvider(application, NewsRepository(ArticleDatabase(this)))
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,12 +57,13 @@ class NewsActivity : AppCompatActivity() {
     }
 
     private fun setUpNavigation(binding: ActivityNewsBinding) {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
         val navController = navHostFragment.navController
         binding.bottomNavigationView.setupWithNavController(navController)
     }
 
-    }
+}
 
 
 

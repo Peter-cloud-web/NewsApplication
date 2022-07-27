@@ -2,12 +2,10 @@ package com.example.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -41,9 +39,9 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
         binding = FragmentSearchNewsBinding.bind(view)
 
-//        viewModel = (activity as NewsActivity).viewModel
         val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
-        val viewModelProviderFactory = NewsViewModelProvider(activity?.application!!,newsRepository)
+        val viewModelProviderFactory =
+            NewsViewModelProvider(activity?.application!!, newsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
         setUpRecyclerView(binding)

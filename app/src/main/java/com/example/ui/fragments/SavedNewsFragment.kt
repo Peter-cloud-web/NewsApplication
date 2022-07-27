@@ -1,10 +1,8 @@
 package com.example.ui.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -32,9 +30,9 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
 
         setUpRecyclerView(binding)
 
-//        viewModel = (activity as NewsActivity).viewModel
         val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
-        val viewModelProviderFactory = NewsViewModelProvider(activity?.application!!,newsRepository)
+        val viewModelProviderFactory =
+            NewsViewModelProvider(activity?.application!!, newsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
         newsAdapter.setOnItemClickListener {
@@ -47,7 +45,8 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
             )
         }
 
-        viewModel.fetchSavedArticles().observe(viewLifecycleOwner, Observer { article ->
+        viewModel.fetchSavedArticles().observe(viewLifecycleOwner,Observer{ article ->
+
             newsAdapter.differ.submitList(article)
 
         })
@@ -55,7 +54,7 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
 
     private fun setUpRecyclerView(binding: FragmentSavedNewsBinding) {
         newsAdapter = NewsAdapter()
-        binding.SavedNewsRecyclerView.apply{
+        binding.SavedNewsRecyclerView.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
         }

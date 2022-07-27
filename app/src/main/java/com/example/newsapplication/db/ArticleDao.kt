@@ -3,6 +3,7 @@ package com.example.newsapplication.db
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.newsapplication.model.Article
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ArticleDao {
