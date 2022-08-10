@@ -9,9 +9,7 @@ import android.util.Log
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Query
@@ -20,121 +18,163 @@ import com.example.newsapplication.model.NewsResponse
 import com.example.newsapplication.repository.NewsRepository
 import com.example.newsapplication.util.AppApplication
 import com.example.newsapplication.util.Constants
+import com.example.newsapplication.util.OfflineViewResourceHandler
 import com.example.newsapplication.util.Resource
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
+import androidx.lifecycle.viewModelScope
 
-@RequiresApi(Build.VERSION_CODES.M)
-class NewsViewModel(app: Application, val newsRepository: NewsRepository):AndroidViewModel(app) {
-    val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    var breakingNewsPage = 1
+class NewsViewModel(app: Application, val newsRepository: NewsRepository):ViewModel() {
 
-    val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    val searchNews = MutableLiveData<Resource<NewsResponse>>()
     var searchNewsPage = 1
 
-    var countryCode = "us"
-    init {
-        getBreakingNews("us")
-        searchNews("microsoft")
-    }
+    private val refreshTriggerChannel = Channel<Refresh>()
 
+    private val refreshTrigger = refreshTriggerChannel.receiveAsFlow()
 
-    fun getBreakingNews(countryCode: String) = viewModelScope.launch {
-        safeGetBreakingNewsArticleApiCall()
-    }
+    private val eventChannel = Channel<Event>()
+    val events = eventChannel.receiveAsFlow()
 
-    fun searchNews(searchQuery: String) = viewModelScope.launch {
-        safeGetSearchedNewsArticles(searchQuery)
-    }
+    private var pendingScrollToTopAfterRefresh = false
 
-
-    private suspend fun safeGetBreakingNewsArticleApiCall() {
-        try {
-            if (hasInternetConnection() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                breakingNews.postValue(Resource.Loading())
-                val response = newsRepository.getBreakingNews(countryCode,breakingNewsPage)
-                breakingNews.postValue(handleBreakingNewsResponse(response))
-            } else {
-                breakingNews.postValue(Resource.Loading())
+    val getBreakingNews = refreshTrigger.flatMapLatest { refresh ->
+        newsRepository.getArticles(
+            refresh == Refresh.FORCE,
+            onFetchSuccess = {pendingScrollToTopAfterRefresh = true},
+            onFetchFailed = { t ->
+                viewModelScope.launch { eventChannel.send(Event.ShowErrorMessage(t)) }
             }
-        } catch (t: Throwable) {
-            when (t) {
-                is IOException -> breakingNews.postValue(Resource.Error("Network Failure"))
-                else -> breakingNews.postValue(Resource.Error("Conversion Error"))
+        )
+    }.stateIn(viewModelScope, SharingStarted.Lazily,null)
 
+    fun onStart() {
+        if (getBreakingNews.value?.status!= Resource.Status.LOADING){
+            viewModelScope.launch {
+                refreshTriggerChannel.send(Refresh.NORMAL)
             }
         }
     }
 
-    private suspend fun safeGetSearchedNewsArticles(searchQuery: String){
-        try{
-            if (hasInternetConnection() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                searchNews.postValue(Resource.Loading())
-                val response = newsRepository.searchNews(searchQuery,searchNewsPage)
-                searchNews.postValue(handleSearchNewsResponse(response))
-            }else{
-                searchNews.postValue(Resource.Error("No internet connection"))
-            }
-        }catch (t:Throwable){
-            when(t){
-                is IOException -> searchNews.postValue(Resource.Error("Network Failure"))
-                else -> searchNews.postValue(Resource.Error("Conversion Error"))
+    fun onManualRefresh() {
+        if (getBreakingNews.value?.status != Resource.Status.LOADING) {
+            viewModelScope.launch {
+                refreshTriggerChannel.send(Refresh.FORCE)
             }
         }
-
     }
 
 
 
-    private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
+    enum class Refresh {
+        FORCE, NORMAL
     }
-
-    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
-    fun saveArticle(article: Article) = viewModelScope.launch {
-        newsRepository.insertArticle(article)
+    sealed class Event {
+        data class ShowErrorMessage(val error: Throwable) : Event()
     }
 
     fun fetchSavedArticles() = newsRepository.getSavedNews()
 
+    fun saveArticle(article: Article) = viewModelScope.launch {
 
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun hasInternetConnection(): Boolean {
-        val connectivityManager = getApplication<AppApplication>().getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
-        }
-    }
-
-        fun deleteArticle(article: Article) = viewModelScope.launch {
-            newsRepository.deleteArticle(article)
-        }
-
+        newsRepository.insertArticle(article)
 
     }
+
+    fun searchNews(searchQuery: String) = viewModelScope.launch {
+//        searchNews.postValue(Resource.loading())
+        val response = newsRepository.searchNews(searchQuery,searchNewsPage)
+        searchNews.postValue(handleBreakingNewsResponse(response))
+    }
+
+    private fun handleBreakingNewsResponse(response:Response<NewsResponse>):Resource<NewsResponse>{
+        if (response.isSuccessful) {
+            response.body()?.let { resultResponse ->
+                return Resource.success(resultResponse)
+            }
+        }
+        return Resource.error(response.message())
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+//    private suspend fun safeGetBreakingNewsArticleApiCall() {
+//        try {
+//            if (hasInternetConnection() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                breakingNews.postValue(Resource.Loading())
+//                val response = newsRepository.getArticles()
+//                breakingNews.postValue(handleBreakingNewsResponse(response))
+//            } else {
+//                breakingNews.postValue(Resource.Loading())
+//            }
+//        } catch (t: Throwable) {
+//            when (t) {
+//                is IOException -> breakingNews.postValue(Resource.Error("Network Failure"))
+//                else -> breakingNews.postValue(Resource.Error("Conversion Error"))
+//
+//            }
+//        }
+//    }
+
+
+//    private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+//        if (response.isSuccessful) {
+//            response.body()?.let { resultResponse ->
+//                return Resource.Success(resultResponse)
+//            }
+//        }
+//        return Resource.Error(response.message())
+//    }
+//
+//    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+//        if (response.isSuccessful) {
+//            response.body()?.let { resultResponse ->
+//                return Resource.Success(resultResponse)
+//            }
+//        }
+//        return Resource.Error(response.message())
+//    }
+
+
+
+
+//
+//
+//
+//    @RequiresApi(Build.VERSION_CODES.M)
+//    private fun hasInternetConnection(): Boolean {
+//        val connectivityManager = getApplication<AppApplication>().getSystemService(
+//            Context.CONNECTIVITY_SERVICE
+//        ) as ConnectivityManager
+//
+//        val activeNetwork = connectivityManager.activeNetwork ?: return false
+//        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+//        return when {
+//            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+//            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+//            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+//            else -> false
+//        }
+//    }
+//
+//        fun deleteArticle(article: Article) = viewModelScope.launch {
+//            newsRepository.deleteArticle(article)
+//        }
+//
+//
+//    }
 
 
 

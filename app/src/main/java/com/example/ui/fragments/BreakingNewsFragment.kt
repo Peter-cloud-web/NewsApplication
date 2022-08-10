@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,8 @@ import com.example.newsapplication.viewModel.NewsViewModel
 import com.example.newsapplication.viewModel.NewsViewModelProvider
 import com.example.ui.activities.NewsActivity
 import com.example.ui.adapters.NewsAdapter
+import kotlinx.coroutines.flow.collect
+
 
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
@@ -37,8 +40,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         setUpRecyclerView(binding)
 
         val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
-        val viewModelProviderFactory =
-            NewsViewModelProvider(activity?.application!!, newsRepository)
+        val viewModelProviderFactory = NewsViewModelProvider(activity?.application!!, newsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
         newsAdapter.setOnItemClickListener {
@@ -51,35 +53,72 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             )
         }
 
-        viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
-            when (response) {
-                is Resource.Success -> {
-                    hideProgressBar(binding)
-                    hideErrorMessage()
-                    response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles)
+//        viewModel.getBreakingNews.observe(viewLifecycleOwner, Observer { response ->
+//            when (response) {
+//                is Resource.Success -> {
+//                    hideProgressBar(binding)
+//                    hideErrorMessage()
+//                    response.data?.let { newsResponse ->
+//                        newsAdapter.differ.submitList(newsResponse.articles)
+//
+//                    }
+//                }
+//                is Resource.Error -> {
+//                    hideProgressBar(binding)
+//                    Log.d(TAG, "inside failure")
+//                    response.message?.let { message ->
+//                        Toast.makeText(activity, "An error occured: $message", Toast.LENGTH_LONG)
+//                            .show()
+//                        showErrorMessage(message)
+//                    }
+//                }
+//                is Resource.Loading -> {
+//                    showProgressBar(binding)
+//                }
+//            }
+//
+//        })
+//        binding.retryButton.setOnClickListener {
+//            viewModel.getBreakingNews("us")
+//        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.getBreakingNews.collect{
+                newsAdapter.differ.submitList(it?.data)
+
+                it ?:return@collect
+
+                showProgressBar(binding)
+
+                when(it.status){
+                    Resource.Status.SUCCESS ->{
+                        hideProgressBar(binding)
+                        hideErrorMessage()
+                        Toast.makeText(activity,"Success",Toast.LENGTH_LONG).show()
 
                     }
-                }
-                is Resource.Error -> {
-                    hideProgressBar(binding)
-                    Log.d(TAG, "inside failure")
-                    response.message?.let { message ->
-                        Toast.makeText(activity, "An error occured: $message", Toast.LENGTH_LONG)
-                            .show()
-                        showErrorMessage(message)
+                    Resource.Status.LOADING ->{
+                        Toast.makeText(activity,"Wait for data. Data is loading...",Toast.LENGTH_LONG).show()
+                    }
+                    Resource.Status.ERROR ->{
+                        showErrorMessage("Sorry!!!,Something went wrong")
+                    }
+                    Resource.Status.FAILURE ->{
+                        showErrorMessage("Sorry!!!,Something went terribly wrong")
                     }
                 }
-                is Resource.Loading -> {
-                    showProgressBar(binding)
-                }
+
             }
 
-        })
-        binding.retryButton.setOnClickListener {
-            viewModel.getBreakingNews("us")
         }
 
+
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.onStart()
     }
 
     private fun hideProgressBar(binding: FragmentBreakingNewsBinding) {

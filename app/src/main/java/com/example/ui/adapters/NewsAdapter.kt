@@ -32,7 +32,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
                         .load(article.urlToImage)
                         .into(articleImageView)
 
-                    sourceTextView.text = article.source.name
+                    sourceTextView.text = article.source!!.name
                     titleTextView.text = article.title
                     descriptionTextView.text = article.description
                     publishedAtTextView.text = article.publishedAt

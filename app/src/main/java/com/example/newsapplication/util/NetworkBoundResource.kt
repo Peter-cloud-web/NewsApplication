@@ -1,28 +1,38 @@
 package com.example.newsapplication.util
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-inline fun <ResultType, RequestType> NetworkBoundResource(
-    crossinline query:() -> Flow<ResultType>,
-    crossinline fetch:suspend () -> RequestType,
-    crossinline saveFetchResult: suspend(RequestType) -> Unit,
-    crossinline shouldFetch:(ResultType) -> Boolean = {true}
-) = flow {
+inline fun <ResultType, RequestType> networkBoundResource(
+    crossinline query: () -> Flow<ResultType>,
+    crossinline fetch: suspend () -> RequestType,
+    crossinline saveFetchResult: suspend (RequestType) -> Unit,
+    crossinline shouldFetch: (ResultType) -> Boolean = { true },
+    crossinline onFetchSuccess: () -> Unit = { },
+    crossinline onFetchFailed: (Throwable) -> Unit = { }
 
+) = channelFlow {
     val data = query().first()
 
-     if (shouldFetch(data)) {
-        emit(Resource.Loading(data))
+    if(shouldFetch(data)){
+        var loading = launch {
+            query().collect{send(Resource.loading(it))}
+        }
+
         try {
             saveFetchResult(fetch())
-            query().collect { Resource.Success(it) }
+            onFetchSuccess()
+            loading.cancel()
+            query().collect{send(Resource.success(it))}
 
-        } catch (throwable: Throwable) {
-            query().collect { Resource.Error(message = String(), it) }
-
+        }catch (throwable:Throwable){
+            onFetchFailed(throwable)
+            loading.cancel()
+            query().collect{send(Resource.error(throwable.toString(),it))}
         }
     }else{
-        query().collect{Resource.Success(it)}
+        query().collect{send(Resource.success(it))}
     }
 
 }

@@ -71,31 +71,12 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
         }
         viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
-            when (response) {
-                is Resource.Success -> {
-                    hideProgressBar(binding)
                     response.data?.let { newsResponse ->
                         newsAdapter.differ.submitList(newsResponse.articles.toList())
                         val totalPages = newsResponse.totalResults
                         isLastPage = viewModel.searchNewsPage == totalPages
                     }
-                }
-
-                is Resource.Error -> {
-                    hideProgressBar(binding)
-                    response.message?.let { message ->
-                        Log.e(TAG, "An error occurred: $message")
-                        Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG)
-                            .show()
-                    }
-                }
-                is Resource.Loading -> {
-                    showProgressBar(binding)
-                }
-
-            }
-        })
-
+                })
     }
 
     private fun setUpRecyclerView(binding: FragmentSearchNewsBinding) {
