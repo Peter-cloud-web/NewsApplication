@@ -37,8 +37,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         setUpRecyclerView(binding)
 
         val newsRepository = NewsRepository(ArticleDatabase(requireContext() as NewsActivity))
-        val viewModelProviderFactory =
-            NewsViewModelProvider(activity?.application!!, newsRepository)
+        val viewModelProviderFactory = NewsViewModelProvider(activity?.application!!, newsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
         newsAdapter.setOnItemClickListener {
@@ -65,12 +64,12 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
                     hideProgressBar(binding)
                     Log.d(TAG, "inside failure")
                     response.message?.let { message ->
-                        Toast.makeText(activity, "An error occured: $message", Toast.LENGTH_LONG)
-                            .show()
-                        showErrorMessage(message)
+                        Toast.makeText(activity, "An error occured: $message", Toast.LENGTH_LONG).show()
+                        showErrorMessage(message,binding)
                     }
                 }
                 is Resource.Loading -> {
+                    Toast.makeText(activity, "Loading", Toast.LENGTH_LONG).show()
                     showProgressBar(binding)
                 }
             }
@@ -95,7 +94,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         isError = false
     }
 
-    private fun showErrorMessage(message: String) {
+    private fun showErrorMessage(message: String,binding: FragmentBreakingNewsBinding) {
         binding.itemErrorMessage.visibility = View.VISIBLE
         binding.errorMessage.text = message
         isError = true

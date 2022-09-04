@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
 
-@RequiresApi(Build.VERSION_CODES.M)
+
 class NewsViewModel(app: Application, val newsRepository: NewsRepository):AndroidViewModel(app) {
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var breakingNewsPage = 1
@@ -51,12 +51,12 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
 
     private suspend fun safeGetBreakingNewsArticleApiCall() {
         try {
-            if (hasInternetConnection() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (hasInternetConnection()) {
                 breakingNews.postValue(Resource.Loading())
                 val response = newsRepository.getBreakingNews(countryCode,breakingNewsPage)
                 breakingNews.postValue(handleBreakingNewsResponse(response))
             } else {
-                breakingNews.postValue(Resource.Loading())
+                breakingNews.postValue(Resource.Error("No internet connection."))
             }
         } catch (t: Throwable) {
             when (t) {
@@ -69,7 +69,7 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
 
     private suspend fun safeGetSearchedNewsArticles(searchQuery: String){
         try{
-            if (hasInternetConnection() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (hasInternetConnection()) {
                 searchNews.postValue(Resource.Loading())
                 val response = newsRepository.searchNews(searchQuery,searchNewsPage)
                 searchNews.postValue(handleSearchNewsResponse(response))
@@ -113,7 +113,7 @@ class NewsViewModel(app: Application, val newsRepository: NewsRepository):Androi
 
 
 
-    @RequiresApi(Build.VERSION_CODES.M)
+
     private fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<AppApplication>().getSystemService(
             Context.CONNECTIVITY_SERVICE
