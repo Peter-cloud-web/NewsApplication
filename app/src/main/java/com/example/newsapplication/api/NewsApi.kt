@@ -4,16 +4,13 @@ import com.example.newsapplication.BuildConfig
 import com.example.newsapplication.model.NewsResponse
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Headers
 import retrofit2.http.Query
 
 interface NewsApi {
 
     companion object {
-       const val api_key = BuildConfig.NEWS_API_KEY
+        const val api_key = BuildConfig.NEWS_API_KEY
     }
-
-
 
     @GET("v2/top-headlines")
     suspend fun getBreakingNews(
@@ -28,6 +25,5 @@ interface NewsApi {
         @Query("page") pageNumber: Int = 1,
         @Query("apiKey") apiKey: String = NewsApi.api_key
     ): Response<NewsResponse>
-
 
 }

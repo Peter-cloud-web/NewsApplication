@@ -24,7 +24,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/Source"
         android:textColor="@color/black"
-        android:textStyle="bold"
+        android:textStyle=""
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/articleImageView" />
 
@@ -40,7 +40,7 @@
         android:text="@string/Title"
         android:textColor="@color/black"
         android:textSize="15sp"
-        android:textStyle="bold"
+        android:textStyle=""
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toRightOf="@+id/articleImageView"
         app:layout_constraintRight_toRightOf="parent"
@@ -57,7 +57,7 @@
         android:maxLines="5"
         android:text="@string/description"
         android:textColor="@color/black"
-        android:textStyle="bold"
+        android:textStyle=""
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/articleImageView"
         app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
@@ -71,7 +71,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/published_at"
         android:textColor="@color/black"
-        android:textStyle="bold"
+        android:textStyle=""
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sourceTextView" />
 

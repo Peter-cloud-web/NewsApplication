@@ -1,13 +1,13 @@
 package com.example.newsapplication.model
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.io.Serializable
-import java.time.LocalDateTime
 
 @Entity(
-    tableName = "articles"
+    tableName = "favourite_articles"
 )
-data class Article(
+data class FavouriteArticles(
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null,
     val author: String?,
@@ -16,14 +16,7 @@ data class Article(
     val publishedAt: String?,
     val source: Source?,
     val title: String?,
-    val isBookmarked:Boolean?,
+    val isBookmarked: Boolean?,
     val url: String,
     val urlToImage: String?
 ) : Serializable
-
-
-
-
-
-
-

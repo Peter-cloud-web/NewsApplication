@@ -2,6 +2,7 @@ package com.example.newsapplication.util
 
 import androidx.recyclerview.widget.DiffUtil
 import com.example.newsapplication.model.Article
+import com.example.newsapplication.model.FavouriteArticles
 
 class RecyclerViewDiffUtil {
 
@@ -17,5 +18,17 @@ class RecyclerViewDiffUtil {
 
         }
 
+        val favouriteNewsDifferCallBack = object: DiffUtil.ItemCallback<FavouriteArticles>() {
+            override fun areItemsTheSame(oldItem: FavouriteArticles, newItem: FavouriteArticles): Boolean {
+                return oldItem.url == newItem.url
+            }
+
+            override fun areContentsTheSame(oldItem: FavouriteArticles, newItem: FavouriteArticles): Boolean {
+                return oldItem == newItem
+            }
+
+        }
+
     }
+
 }

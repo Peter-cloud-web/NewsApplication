@@ -54,6 +54,7 @@
     </androidx.cardview.widget.CardView>
 
 
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar
         android:id="@+id/paginationProgressBar"
@@ -63,7 +64,5 @@
         android:visibility="invisible"
         android:layout_gravity="bottom|center"
         android:background="@android:color/transparent" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </FrameLayout>

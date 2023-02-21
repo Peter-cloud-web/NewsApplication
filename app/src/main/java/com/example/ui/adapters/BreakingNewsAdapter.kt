@@ -9,24 +9,24 @@ import com.example.newsapplication.databinding.ItemArticlesBinding
 import com.example.newsapplication.model.Article
 import com.example.newsapplication.util.RecyclerViewDiffUtil
 
-class NewsAdapter : RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
+class BreakingNewsAdapter : RecyclerView.Adapter<BreakingNewsAdapter.MyViewHolder>() {
 
-    inner class MyViewHolder(val binding:ItemArticlesBinding):
-            RecyclerView.ViewHolder(binding.root)
+    inner class MyViewHolder(val binding: ItemArticlesBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     val differ = AsyncListDiffer(this, RecyclerViewDiffUtil.differCallBack)
-
-     private var  onItemClickListener:((Article) -> Unit)? = null
+    private var onItemClickListener: ((Article) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val binding = ItemArticlesBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        val binding =
+            ItemArticlesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MyViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val article = differ.currentList[position]
-        with(holder){
-            with(article){
+        with(holder) {
+            with(article) {
                 binding.apply {
                     Glide.with(itemView)
                         .load(article.urlToImage)
@@ -37,8 +37,8 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
                     descriptionTextView.text = article.description
                     publishedAtTextView.text = article.publishedAt
 
-                    itemView.setOnClickListener{
-                        onItemClickListener?.let{it(article)}
+                    itemView.setOnClickListener {
+                        onItemClickListener?.let { it(article) }
                     }
 
                 }
@@ -50,9 +50,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
         return differ.currentList.size
     }
 
-    fun setOnItemClickListener(listener:(Article) -> Unit){
+    fun setOnItemClickListener(listener: (Article) -> Unit) {
         onItemClickListener = listener
     }
-
-
 }

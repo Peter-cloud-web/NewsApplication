@@ -1,4 +1,4 @@
-package com.example.newsapplication.db
+package com.example.newsapplication.db.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
@@ -12,14 +12,8 @@ interface ArticleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArticle(article: List<Article>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFavouriteArticles(article: Article)
-
     @Query("SELECT * FROM articles")
     fun getAllArticles(): Flow<List<Article>>
-
-    @Query("SELECT * FROM articles")
-    fun getFavouriteArticles():LiveData<List<Article>>
 
     @Query("DELETE FROM articles")
     suspend fun deleteArticle()
